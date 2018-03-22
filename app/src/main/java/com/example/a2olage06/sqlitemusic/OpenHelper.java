@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteStatement;
 import android.view.GestureDetector;
 
 import java.util.ArrayList;
@@ -36,25 +37,52 @@ public class OpenHelper extends SQLiteOpenHelper {
 
     }
 
-    public ArrayList<Song>findSon()
-    {
-        String title=  "";
-        ArrayList<Song> music_sample = new ArrayList<Song>();
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM music_sample WHERE title = ?/", new String[] {title});
 
-        if(cursor.moveToFirst()){
-            while(!cursor.isAfterlast())
-            {
-                Song s = new Song
-                        (cursor.getString(cursor.getColumnIndex("title"))),
-                        cursor.getString(cursor.getColumnIndex("artist")),
-                        cursor.getLong(cursor.getColumnIndex("year"));
-                Song.add(s);
-                cursor.moveToNext()
-            }
-        }#
-        cursor.close();
-        return Song;
+    public long insertSong(String title, String artist, long year)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        SQLiteStatement st = db.compileStatement(
+                "INSERT INTO Songs(title,artist,year) VALUES(?,?,?)"
+        );
+        st.bindString (1, title);
+        st.bindString (2, artist);
+        st.bindLong (3, year);
+        long id = st.executeInsert();
+        return id;
     }
+
+
+    public int updateSong(long id, String title, String artist, long year)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        SQLiteStatement st = db.compileStatement(
+                "UPDATE Song SET title = ?, artist=?, year=? WHERE title=? "
+        );
+        st.bindString(1, title);
+        st.bindString(2, artist);
+        st.bindLong (3, year);
+        int affectedRows = st.executeUpdateDelete();
+        return affectedRows;
+
+    }
+
+    public int deleteSong(long id, String title, String artist, long year)
+    {
+        SQLiteDatabase db = getWritableDatabase();
+        SQLiteStatement st = db.compileStatement(
+                "DELETE FROM Song WHERE title=?, artist=?, year=?");
+        st.bindString(1, title);
+        st.bindString(2, artist);
+        st.bindLong(3, year);
+        int affectedRows = st.executeUpdateDelete();
+        return affectedRows;
+    }
+
+
+
+
+
+
+
+
 }
